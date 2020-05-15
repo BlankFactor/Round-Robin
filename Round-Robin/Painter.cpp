@@ -124,7 +124,7 @@ void Painter::DrawRect(int _x, int _y,Process* _p) {
 
 	string str = "ID : ";
 	str.push_back(_p->GetID());
-	TCHAR* tcs = new TCHAR[str.size() + 1];
+	TCHAR* tcs = new TCHAR[str.size() + 1];	
 	tcs[str.size()] = 0;
 	copy(str.begin(), str.end(), tcs);
 	outtextxy(left, bottom + (i++ * spacing), tcs);
