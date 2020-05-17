@@ -3,7 +3,7 @@ class Process
 {
 private:
 	int time_Execute;
-	int time_Remain;
+	int time_Residual;
 	int time_Start;
 
 	int time_Finished;
@@ -18,6 +18,8 @@ private:
 public:
 	Process(int _execute, int _start);
 
+	int Execute(int _q);
+
 	char GetID();
 
 	float Get_Time_Turnover();
@@ -26,9 +28,7 @@ public:
 	int Get_Time_Finished();
 	int Get_Time_Start();
 	int Get_Time_Execute();
-	int Execute(int _q);
-
-	int Get_Remain();
+	int Get_Residual();
 
 	void SetInQueue(bool _v);
 

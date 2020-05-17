@@ -139,7 +139,7 @@ void Painter::DrawRect(int _x, int _y,Process* _p) {
 	str.clear();
 
 	str = "Exec : ";
-	str.append(to_string(_p->Get_Remain()));
+	str.append(to_string(_p->Get_Residual()));
 	tcs = new TCHAR[str.size() + 1];
 	tcs[str.size()] = 0;
 	copy(str.begin(), str.end(), tcs);

@@ -8,7 +8,7 @@ char Process::ID = 'A';
 Process::Process(int _execute, int _start)
 {
 	time_Execute = _execute;
-	time_Remain = _execute;
+	time_Residual = _execute;
 	time_Start = _start;
 
 	id = ID++;
@@ -51,24 +51,24 @@ int Process::Get_Time_Execute()
 }
 
 int Process::Execute(int _q) {
-	int result = time_Remain - _q;
+	int result = time_Residual - _q;
 
 	if (result < 0) {
 		finished = true;
 		inQueue = false;
 
-		time_Finished = ProcessManager::Get_CurrentTime() + time_Remain;
+		time_Finished = ProcessManager::Get_CurrentTime() + time_Residual;
 		time_Turnover = time_Finished - time_Start;
 		time_Turnover_Weight = time_Turnover / time_Execute;
 
-		time_Remain = 0;
+		time_Residual = 0;
 
 		return abs(result);	
 	}
 	else {
-		time_Remain -= _q;
+		time_Residual -= _q;
 
-		if (time_Remain == 0) {
+		if (time_Residual == 0) {
 
 			time_Finished = ProcessManager::Get_CurrentTime() +  _q;
 			time_Turnover = time_Finished - time_Start;
@@ -82,9 +82,9 @@ int Process::Execute(int _q) {
 	}
 }
 
-int Process::Get_Remain()
+int Process::Get_Residual()
 {
-	return time_Remain;
+	return time_Residual;
 }
 
 void Process::SetInQueue(bool _v)

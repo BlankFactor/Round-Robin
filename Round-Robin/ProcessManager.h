@@ -22,7 +22,6 @@ private:
 
 	static queue<Process*> processQueue;
 	static vector<Process*> processPool;
-	static vector<Process*> process_Finished;
 	static vector<Process*> process_All;
 
 public:
@@ -31,11 +30,11 @@ public:
 	static void Execute();
 
 	static void AddProcess(Process* _process);
-	static void Action();
+	static void Action();	
 	static void SetTimeclip(int _v);
 
 	static void DisplayInfo();
-	static void DisplayCurrentInfo();
+	static void DisplayProcessInfo();
 
 	static int Get_CurrentTime();
 };

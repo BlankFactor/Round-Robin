@@ -41,7 +41,7 @@ int main()
 	bool random = false;
 	char temp;
 	srand((unsigned)time(0));
-	cout << "是否随机生成开始-运行时间? Y/y->true other->false ";
+	cout << "是否随机生成开始-运行时间?\nY/y->true\nother->false\n";
 	cin >> temp;
 	if (temp == 'Y' or temp == 'y')random = true;
 	cout << "确认是否随机生成 : " << random << endl;

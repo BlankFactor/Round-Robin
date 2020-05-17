@@ -21,48 +21,31 @@ char ProcessManager::current_Id = '0';
 
 queue<Process*> ProcessManager::processQueue;
 vector<Process*> ProcessManager::processPool;
-vector<Process*> ProcessManager::process_Finished;
 vector<Process*> ProcessManager::process_All;
 
 void ProcessManager::Execute()
 {
 	while (enable) {
-		
-		//_getch();
-
-		try {
-			// 追加新进程
-			if (processPool.size() > 0) {
-				vector<Process*> temp(processPool);
-				auto it = temp.begin();
-				int offset = 0;
-				for (int i = 0; i < processPool.size(); i++) {
-					if (processPool[i]->Get_Time_Start() <= current_Time) {
-						processQueue.push(processPool[i]);
-						temp.erase(it + (i - offset));
-						processPool[i]->SetInQueue(true);
-
-						it = temp.begin();
-						offset++;
-					}
-				}
-
-				processPool.clear();
-				processPool = temp;
-				temp.~vector();
-			}
-		}
-		catch (exception& e) {
-			cerr << e.what() << endl;
-		}
-
 		// 队列中无进程且还有进程未进入队列
 		if (processQueue.empty() && total != count) {
-			current_Time += timeclip;
-			Painter::Draw(process_All);
-			DisplayCurrentInfo();
-			Sleep(1000);
-			continue;
+
+			// 寻找最近进程
+			auto min = processPool.begin();
+			auto it = processPool.begin();
+			int minT = processPool[0]->Get_Time_Start();
+			int minI = 0;
+			for (int i = 0; i < processPool.size(); i++, it++) {
+				if (processPool[i]->Get_Time_Start() < minT) {
+					minT = processPool[i]->Get_Time_Start();
+					min = it;
+					minI = i;
+				}
+			}
+
+			current_Time += (minT - current_Time);
+			processQueue.push(processPool[minI]);
+			processPool.erase(min);
+			processQueue.front()->SetInQueue(true);
 		}
 
 		Process* p;
@@ -72,30 +55,50 @@ void ProcessManager::Execute()
 		current_Time += timeclip - remain;
 		current_Id = p->GetID();
 		
+		
+		// 追加新进程
+		if (processPool.size() > 0) {
+			vector<Process*> temp(processPool);
+			auto it = temp.begin();
+			int offset = 0;
+			for (int i = 0; i < processPool.size(); i++) {
+				if (processPool[i]->Get_Time_Start() <= current_Time) {
+					processQueue.push(processPool[i]);
+					temp.erase(it + (i - offset));
+					processPool[i]->SetInQueue(true);
+
+					it = temp.begin();
+					offset++;
+				}
+			}
+
+			processPool.clear();
+			processPool = temp;
+			temp.~vector();
+		}
 
 		if (!p->GetFinished()) {
 			processQueue.push(p);
 		}
 		else {
 			total++;
-			process_Finished.push_back(p);
-			cout << endl;
 		}
 
 		// 全部进程处理完成
 		if (total == count) {
 			current_Id = '0';
+			enable = true;
 			break;
 		}
 		Painter::Draw(process_All);
-		DisplayCurrentInfo();
+		DisplayProcessInfo();
 		Sleep(100);
 
 		current_Id = '0';
 	}
 
 	Painter::Draw(process_All);
-	DisplayCurrentInfo();
+	DisplayProcessInfo();
 	DisplayInfo();
 	_getch();
 	closegraph();
@@ -104,14 +107,14 @@ void ProcessManager::Execute()
 void ProcessManager::Action() {
 	Painter::Initial();
 	Painter::Draw(process_All);
-	DisplayCurrentInfo();
+	DisplayProcessInfo();
 	enable = true;
 
 	if (count <= 0) {
 		enable = false;
 		exit(0);
 	}
-
+	
 	auto min = processPool.begin();
 	auto it = processPool.begin();
 	int minT = processPool[0]->Get_Time_Start();
@@ -128,6 +131,7 @@ void ProcessManager::Action() {
 	processQueue.push(processPool[minI]);
 	processPool.erase(min);
 	processQueue.front()->SetInQueue(true);
+	
 	Execute();
 }
 
@@ -146,9 +150,9 @@ void ProcessManager::DisplayInfo()
 	float total_Turnover = 0;
 	double total_Turnover_Weight = 0;
 
-	for (int i = 0; i < process_Finished.size(); i++) {
-		total_Turnover += process_Finished[i]->Get_Time_Turnover();
-		total_Turnover_Weight += process_Finished[i]->Get_Time_Turnover_Weight();
+	for (int i = 0; i < process_All.size(); i++) {
+		total_Turnover += process_All[i]->Get_Time_Turnover();
+		total_Turnover_Weight += process_All[i]->Get_Time_Turnover_Weight();
 	}
 
 	cout << fixed << setprecision(2)<<endl;
@@ -167,7 +171,7 @@ void ProcessManager::DisplayInfo()
 	cout << "************************************************************************" << endl;
 }
 
-void ProcessManager::DisplayCurrentInfo()
+void ProcessManager::DisplayProcessInfo()
 {
 	cout << endl;
 	cout << "当前时刻 : " << current_Time << endl;
@@ -179,10 +183,10 @@ void ProcessManager::DisplayCurrentInfo()
 			(process_All[i]->GetID() == current_Id)stats = "运行中";
 		else
 		{
-			stats = process_All[i]->GetFinished() ? "完成" : process_All[i]->GetInQueue() ? "激活" : "未进入";
+			stats = process_All[i]->GetFinished() ? "完成" : process_All[i]->GetInQueue() ? "就绪" : "未就绪";
 		}
 
-		cout << process_All[i]->GetID() << "\t\t" << process_All[i]->Get_Time_Start() << "\t\t" << process_All[i]->Get_Time_Execute() <<"\t\t"<<stats<<"\t\t"<<process_All[i]->Get_Remain()<<endl;
+		cout << process_All[i]->GetID() << "\t\t" << process_All[i]->Get_Time_Start() << "\t\t" << process_All[i]->Get_Time_Execute() <<"\t\t"<<stats<<"\t\t"<<process_All[i]->Get_Residual()<<endl;
 	}
 	cout << "************************************************************************" << endl;
 }
